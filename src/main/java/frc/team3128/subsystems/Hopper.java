@@ -41,7 +41,7 @@ public class Hopper extends SubsystemBase {
 
     private void configEncoders() {
         m_encoder = new Encoder(HopperConstants.HOPPER_DIO_PIN1, HopperConstants.HOPPER_DIO_PIN2);
-        m_encoder.setDistancePerPulse(4./256.);
+        m_encoder.setDistancePerPulse(2.5 * Math.Pi); //ticks to inches
         m_encoder.setReverseDirection(true);
     }
 
@@ -107,7 +107,7 @@ public class Hopper extends SubsystemBase {
 
     public void reverseHopper() {
         m_encoder.reset();
-        m_hopper.set(HopperConstants.REVERSE_HOPPER_MOTOR_POWER); //change later
+        m_hopper.set(HopperConstants.REVERSE_HOPPER_MOTOR_POWER);
     }
 
     /**

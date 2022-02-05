@@ -143,10 +143,10 @@ public class Constants {
 
         public static final int HOPPER_DIO_PIN1 = 0;
         public static final int HOPPER_DIO_PIN2 = 1;
-        public static final int HOPPER_MAX_REVERSE_DISTANCE = 0; //set distance
+        public static final double HOPPER_MAX_REVERSE_DISTANCE = 1.5; //in inches
 
         public static final double HOPPER_MOTOR_POWER = 0.5;
-        public static final double REVERSE_HOPPER_MOTOR_POWER = 0.5;
+        public static final double REVERSE_HOPPER_MOTOR_POWER = 0.5; //change
     }
 
     public static class IntakeConstants {
