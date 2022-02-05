@@ -76,7 +76,7 @@ public class RobotContainer {
         m_balLimelight = new Limelight("sog", 0, 0, 0, 0);
 
         m_commandScheduler.setDefaultCommand(m_drive, new CmdArcadeDrive(m_drive, m_rightStick::getY, m_rightStick::getTwist, m_rightStick::getThrottle));
-        m_commandScheduler.setDefaultCommand(m_hopper, new CmdHopperDefault(m_hopper, m_shooter::atSetpoint)); //TODO: make input into this good method ???
+        //m_commandScheduler.setDefaultCommand(m_hopper, new CmdHopperDefault(m_hopper, m_shooter::atSetpoint)); //TODO: make input into this good method ???
 
         try {
             Path trajPath = Filesystem.getDeployDirectory().toPath().resolve(trajJson);
