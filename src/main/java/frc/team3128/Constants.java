@@ -21,6 +21,7 @@ public class Constants {
         public static final double SPARK_VELOCITY_FACTOR = SPARK_ENCODER_RESOLUTION / 60; // RPM to nu/s
         public static final double FALCON_NUp100MS_TO_RPM = 10 * 60 / FALCON_ENCODER_RESOLUTION; // sensor units per 100 ms to rpm
         public static final double FALCON_NUpS_TO_RPM = 60 / FALCON_ENCODER_RESOLUTION; // sensor units per second to rpm
+        public static final double SPARK_NUpS_TO_RPM = 60 / SPARK_ENCODER_RESOLUTION; // sensor units per second to rpm ??? double check
 
         public static final double INCHES_TO_METERS = 0.0254;
     }
@@ -133,14 +134,34 @@ public class Constants {
   
     public static class AdjustableShooterConstants {
 
+        //Motor Constants
         public static final int HOOD_SHOOTER_ID = 0;
         public static final double HOOD_SHOOTER_SPEED = .5; 
         public static final int HOOD_SENSOR_ID = 0;
         public static final int HOOD_SHOOTER_GEAR_RATIO = 0;
         public static final int HOOD_AXLE_DIAMETER = 0; 
+        
+        //Pid?
+        public static final double TX_THRESHOLD = 5; //degrees
+        public static final double TX_THRESHOLD_MAX = 10; //degrees
+        public static final double TIME_TO_MAX_THRESHOLD = 5; //seconds
+        public static final double TX_THRESHOLD_INCREMENT = (TX_THRESHOLD_MAX - TX_THRESHOLD) / TIME_TO_MAX_THRESHOLD; //degrees per second
+
+
+        // Field Constants
         public static final int UPPERHUB_HEIGHT = 0;
         public static final int LOWERHUB_HEIGHT = 0;
 
+        //PID Constants
+        public static final double ADJUSTABLE_SHOOTER_PID_kP = 0;
+        public static final double ADJUSTABLE_SHOOTER_PID_kI = 0;
+        public static final double ADJUSTABLE_SHOOTER_PID_kD = 0;
+        public static final int PLATEAU_COUNT = 0;
+        public static final double ADJUSTABLE_SHOOTER_KS = 0; 
+        public static final double ADJUSTABLE_SHOOTER_KV= 0;
+        public static final double ADJUSTABLE_SHOOTER_PID_kF = 0;
+        public static final double ALIGN_PLATEAU_COUNT = 0;
+        //KA is unneeded becuase inertia is too low
     }
 
     public static class HopperConstants {
