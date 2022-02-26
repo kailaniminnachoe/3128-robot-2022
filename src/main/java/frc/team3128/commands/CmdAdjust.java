@@ -3,12 +3,14 @@ package frc.team3128.commands;
 import frc.team3128.subsystems.AdjustableShooter;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
-public class CmdAdjust {
-    private AdjustableShooter adjustableShooter; 
+public class CmdAdjust extends CommandBase{
+    private AdjustableShooter adjustableShooter;
+    private double desiredAngle;
     
     public CmdAdjust(AdjustableShooter adjustableShooter, double desiredAngle) {
         
         this.adjustableShooter = adjustableShooter;
+        this.desiredAngle = desiredAngle;
 
         addRequirements(adjustableShooter, desiredAngle);
     }

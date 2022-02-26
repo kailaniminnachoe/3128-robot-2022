@@ -2,37 +2,36 @@ package frc.team3128.subsystems;
 
 import frc.team3128.Constants.AdjustableShooterConstants;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.team3128.common.hardware.motorcontroller.NAR_CANSparkMax;
 import frc.team3128.common.infrastructure.NAR_PIDSubsystem;
+import frc.team3128.common.narwhaldashboard.NarwhalDashboard;
 import net.thefletcher.revrobotics.enums.MotorType;
 
 public class AdjustableShooter extends NAR_PIDSubsystem{
 
     //defintions 
     private static AdjustableShooter instance;
-    private NAR_CANSparkMax m_hoodShooter;
-    private DigitalInput m_hoodSensor;
-    private double desiredAngle; 
+    private NAR_CANSparkMax m_adjustableShooter;
+    private double currentAngle; 
+    private double desiredAngle = AdjustableShooterConstants.SETPOINT_ANGLE; 
 
-    private double previousTime, currentTime; // seconds
+    private double previousTime = 0, currentTime = 0; // seconds
     private double previousError, currentError;
     private boolean isAdjusted;
-    private double txThreshold = AdjustableShooterConstants.TX_THRESHOLD; //degrees
-    private int plateauCount;
+    private double thresholdPercent = AdjustableShooterConstants.ADJUSTABLE_SHOOTER_THRESHOLD; //degrees
+    private int plateauCount = 0;
 
     //configuration    
-    public AdjustableShooter() {
-        super(new PIDController(
+    public AdjustableShooter() { 
+        super(new PIDController( 
             AdjustableShooterConstants.ADJUSTABLE_SHOOTER_PID_kP, 
             AdjustableShooterConstants.ADJUSTABLE_SHOOTER_PID_kI, 
             AdjustableShooterConstants.ADJUSTABLE_SHOOTER_PID_kD), 
             AdjustableShooterConstants.PLATEAU_COUNT);
 
         configMotors();
-        configSensors();
     }
 
     //instance
@@ -45,77 +44,64 @@ public class AdjustableShooter extends NAR_PIDSubsystem{
 
     //motor
     private void configMotors() {
-        m_hoodShooter = new NAR_CANSparkMax(AdjustableShooterConstants.HOOD_SHOOTER_ID, MotorType.kBrushless);
-    }
-
-    //sensors
-    private void configSensors() {
-        m_hoodSensor= new DigitalInput(AdjustableShooterConstants.HOOD_SENSOR_ID);
+        m_adjustableShooter = new NAR_CANSparkMax(AdjustableShooterConstants.ADJUSTABLE_SHOOTER_ID, MotorType.kBrushless);
     }
 
     //Similar to Shooter PID, however does not have a "state" but uses angle 
+    //includes StartPID
     public void beginAdjust(double desiredAngle) {
-        desiredAngle = this.desiredAngle; 
-        super.setSetpoint(desiredAngle);
+        desiredAngle = AdjustableShooterConstants.SETPOINT_ANGLE; 
+        super.setSetpoint(desiredAngle); //Angle calculated dependent on math; could be set to a degree to test
+        super.resetPlateauCount();
     }
 
     public void stopAdjust() {
         super.resetPlateauCount();
-        setSetpoint(0);
+        setSetpoint(0); //zeroes at base
     }
 
     @Override
     protected double getMeasurement() {
-        return m_hoodShooter.getSelectedSensorPosition();
+        return m_adjustableShooter.get(); //gets encoder count
     } 
 
-    /**
-     * Use the raw voltage output from the PID loop, add a feed forward component, and convert it to a percentage of total
-     * possible voltage to apply to the motors.
-     * Do we want to implent the sensors or are already implemented in this PID loop? 
-     * 
-     * @param output Output from the PID Loop (RPM)
-     * @param setpoint The desired setpoint RPM for the PID Loop (RPM)
-     */
+    private double getAngle(double currentAngle) {
+        currentAngle = getMeasurement(); 
+        return currentAngle * 360 / AdjustableShooterConstants.ADJUSTABLE_SHOOTER_GEAR_RATIO; //degrees
+    }
+
+    private double getArcLengthFromAngle (double currentAngle) {
+        currentAngle = getAngle(currentAngle);
+        return AdjustableShooterConstants.ADJUSTABLE_MOTOR_TO_OUTER_PLATE_DISTANCE * currentAngle / 360; //inches
+    }
 
     @Override
     protected void useOutput(double currentAngle, double desiredAngle) {
-        desiredAngle = this.desiredAngle; 
         currentAngle = getMeasurement(); 
+        desiredAngle = this.desiredAngle; 
         currentTime = RobotController.getFPGATime()/1e6; 
         currentError = desiredAngle - currentAngle;
 
-        if (txThreshold < AdjustableShooterConstants.TX_THRESHOLD_MAX) {
-            txThreshold += (currentTime - previousTime) * (AdjustableShooterConstants.TX_THRESHOLD_INCREMENT);
+        currentTime = RobotController.getFPGATime() / 1e6;
+        if (thresholdPercent < AdjustableShooterConstants.ADJUSTABLE_SHOOTER_THRESHOLD_MAX) {
+            thresholdPercent += ((currentTime - previousTime) * ((AdjustableShooterConstants.ADJUSTABLE_SHOOTER_THRESHOLD_MAX - AdjustableShooterConstants.ADJUSTABLE_SHOOTER_THRESHOLD_INCREMENT)) / AdjustableShooterConstants.TIME_TO_MAX_THRESHOLD);
+            getController().setTolerance(thresholdPercent * desiredAngle);
         }
+
+        checkPlateau(desiredAngle, AdjustableShooterConstants.ADJUSTABLE_SHOOTER_THRESHOLD_INCREMENT);
 
         double ff = Math.signum(currentError) * AdjustableShooterConstants.ADJUSTABLE_SHOOTER_PID_kF;
         double feedbackPower = AdjustableShooterConstants.ADJUSTABLE_SHOOTER_PID_kP * currentError + AdjustableShooterConstants.ADJUSTABLE_SHOOTER_PID_kD * (currentError - previousError) / (currentTime - previousTime) + ff;
-                
-        m_hoodShooter.set(feedbackPower); 
 
-        if (Math.abs(currentError) < txThreshold) {
-            plateauCount++;
-            if (plateauCount > AdjustableShooterConstants.ALIGN_PLATEAU_COUNT) {
-                isAdjusted = true;
-                }
-        else {
-            isAdjusted = false;
-            plateauCount = 0;
-            }
-        }   
+        m_adjustableShooter.set(feedbackPower); 
+
         previousError = currentError; 
-        
+        previousTime = currentTime;
     }
 
      public void periodic() {
         //Narwhal dashboard
-        SmartDashboard.putString("HoodAngle", m_hoodSensor.toString());
-        SmartDashboard.putBoolean("isAdjusted", isAdjusted);
-    }
-
-    public double calculateMotorVelocityFromDist(double angle) {
-        return 0; //math ask someone 
-        //would this be getMeasuremnet? 
+        NarwhalDashboard.put("HoodAngle", getAngle(currentAngle)); //number //maybe have ontop of graph with interpolation
+        NarwhalDashboard.put("isAdjusted", isAdjusted);
     }
 }

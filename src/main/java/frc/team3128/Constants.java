@@ -135,18 +135,18 @@ public class Constants {
     public static class AdjustableShooterConstants {
 
         //Motor Constants
-        public static final int HOOD_SHOOTER_ID = 0;
-        public static final double HOOD_SHOOTER_SPEED = .5; 
-        public static final int HOOD_SENSOR_ID = 0;
-        public static final int HOOD_SHOOTER_GEAR_RATIO = 0;
-        public static final int HOOD_AXLE_DIAMETER = 0; 
+        public static final int ADJUSTABLE_SHOOTER_ID = 0; 
+        public static final double ADJUSTABLE_SHOOTER_SPEED = 0; //check neo
+        public static final int ADJUSTABLE_SHOOTER_GEAR_RATIO = 101;
+        public static final double ADJUSTABLE_AXLE_DIAMETER = 0.5; //inches
+        public static final double ADJUSTABLE_MOTOR_TO_OUTER_PLATE_DISTANCE = 1.25; 
         
-        //Pid?
-        public static final double TX_THRESHOLD = 5; //degrees
-        public static final double TX_THRESHOLD_MAX = 10; //degrees
+        //PID
+        public static final double ADJUSTABLE_SHOOTER_THRESHOLD = 5; //degrees
+        public static final double ADJUSTABLE_SHOOTER_THRESHOLD_MAX = 10; //degrees
         public static final double TIME_TO_MAX_THRESHOLD = 5; //seconds
-        public static final double TX_THRESHOLD_INCREMENT = (TX_THRESHOLD_MAX - TX_THRESHOLD) / TIME_TO_MAX_THRESHOLD; //degrees per second
-
+        public static final double ADJUSTABLE_SHOOTER_THRESHOLD_INCREMENT = (ADJUSTABLE_SHOOTER_THRESHOLD_MAX - ADJUSTABLE_SHOOTER_THRESHOLD) / TIME_TO_MAX_THRESHOLD; //degrees per second
+        public static final int SETPOINT_ANGLE = 45; 
 
         // Field Constants
         public static final int UPPERHUB_HEIGHT = 0;
@@ -161,7 +161,6 @@ public class Constants {
         public static final double ADJUSTABLE_SHOOTER_KV= 0;
         public static final double ADJUSTABLE_SHOOTER_PID_kF = 0;
         public static final double ALIGN_PLATEAU_COUNT = 0;
-        //KA is unneeded becuase inertia is too low
     }
 
     public static class HopperConstants {
